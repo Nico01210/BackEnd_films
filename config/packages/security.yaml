@@ -43,11 +43,12 @@ security:
         - { path: ^/api/directors, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/contexts, roles: PUBLIC_ACCESS }
+        - { path: ^/api/reviews$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/reviews/, roles: PUBLIC_ACCESS, methods: [GET] }
         
         # Routes protégées - authentification requise
         - { path: ^/api/users, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/ratings, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/reviews, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/custom_lists, roles: IS_AUTHENTICATED_FULLY }
         
         # Modifications sur API - authentification requise

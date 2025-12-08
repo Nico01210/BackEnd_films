@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\ReviewRepository;
+use App\State\ReviewProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -21,7 +22,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['updatedAt' => 'DESC'],
 )]
 #[Get()]
-#[Post(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
+#[GetCollection()]
+#[Post(
+    processor: ReviewProcessor::class,
+    securityPostDenormalize: "is_granted('ROLE_USER')"
+)]
 #[Patch(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
 #[Delete(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
 #[ApiResource(
@@ -33,12 +38,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 #[ApiResource(
     uriTemplate: '/movies/{movieId}/reviews',
-    operations: [ new GetCollection() ],
+    operations: [
+        new GetCollection(),
+        new Post(
+            processor: ReviewProcessor::class,
+            securityPostDenormalize: "is_granted('ROLE_USER')"
+        )
+    ],
     uriVariables: ['movieId' => new Link(toProperty: 'movie', fromClass: Movie::class)],
     normalizationContext: ['groups' => ['review:read']],
+    denormalizationContext: ['groups' => ['review:write']],
     order: ['updatedAt' => 'DESC']
 )]
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
+#[ORM\UniqueConstraint(name: 'unique_user_movie_review', columns: ['user_id', 'movie_id'])]
 class Review
 {
     use TimestampableEntity;
