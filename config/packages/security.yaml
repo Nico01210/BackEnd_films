@@ -1,0 +1,54 @@
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        users_in_db:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        login:
+            pattern: ^/api/auth$
+            stateless: true
+            json_login:
+                check_path: /api/auth
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
+    access_control:
+        # Routes publiques - accès sans authentification
+        - { path: ^/api/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/movies$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/movies/, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/genres$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/genres/, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/people$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/people/, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/casts, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/directors, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/contexts, roles: PUBLIC_ACCESS }
+        
+        # Routes protégées - authentification requise
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/ratings, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/reviews, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/custom_lists, roles: IS_AUTHENTICATED_FULLY }
+        
+        # Modifications sur API - authentification requise
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY, methods: [POST, PUT, PATCH, DELETE] }
