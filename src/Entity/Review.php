@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['updatedAt' => 'DESC'],
 )]
 #[Get()]
-#[GetCollection()]
+#[GetCollection(security: "true")]
 #[Post(
     processor: ReviewProcessor::class,
     securityPostDenormalize: "is_granted('ROLE_USER')"

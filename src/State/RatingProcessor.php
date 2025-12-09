@@ -55,7 +55,7 @@ final readonly class RatingProcessor implements ProcessorInterface
                 throw new BadRequestHttpException('Utilisateur non trouvé.');
             }
             
-            // Chercher les ratings existants AVANT de vider le cache
+            // Chercher les ratings existants
             $existingRating = $this->entityManager->getRepository(Rating::class)->findOneBy([
                 'user' => $managedUser,
                 'movie' => $managedMovie
@@ -63,7 +63,7 @@ final readonly class RatingProcessor implements ProcessorInterface
 
             if ($existingRating) {
                 throw new BadRequestHttpException(
-                    'Vous avez déjà noté ce film. Vous pouvez modifier votre note.'
+                    'Vous avez déjà noté ce film. Utilisez PATCH pour modifier votre note existante.'
                 );
             }
             

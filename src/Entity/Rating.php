@@ -21,6 +21,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['updatedAt' => 'DESC'],
 )]
 #[Get()]
+#[GetCollection(security: "true")]
 #[Post(processor: RatingProcessor::class, securityPostDenormalize: "is_granted('ROLE_USER')")]
 #[Patch(processor: RatingProcessor::class)]
 #[Delete(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser().getId() == user.getId()")]
@@ -46,6 +47,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['updatedAt' => 'DESC']
 )]
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
+#[ORM\UniqueConstraint(name: 'unique_user_movie_rating', columns: ['user_id', 'movie_id'])]
 class Rating
 {
     use TimestampableEntity;

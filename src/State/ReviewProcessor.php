@@ -49,7 +49,7 @@ final readonly class ReviewProcessor implements ProcessorInterface
 
             if ($existingReview) {
                 throw new BadRequestHttpException(
-                    'Vous avez déjà commenté ce film. Vous pouvez seulement modifier ou supprimer votre commentaire existant.'
+                    'Vous avez déjà commenté ce film. Utilisez PATCH pour modifier votre commentaire existant.'
                 );
             }
         }
