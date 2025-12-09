@@ -3,11 +3,15 @@
 namespace App\State;
 
 use App\Entity\Review;
+use App\Entity\User;
+
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 
 /**
  * @implements ProcessorInterface<Review, Review|void>
@@ -31,10 +35,13 @@ final readonly class ReviewProcessor implements ProcessorInterface
             return $this->processor->process($data, $operation, $uriVariables, $context);
         }
 
+        /** @var User|UserInterface|null $user */
         $user = $this->security->getUser();
+        /** @var string|null $method */
+        $method = $operation->getMethod();
 
         // Si c'est un POST (création), vérifier qu'il n'existe pas déjà une review
-        if ($operation->getMethod() === 'POST') {
+        if ($method === 'POST') {
             $existingReview = $this->entityManager->getRepository(Review::class)->findOneBy([
                 'user' => $user,
                 'movie' => $data->getMovie()

@@ -64,6 +64,7 @@ class AuthController extends AbstractController
     #[Route('/api/me', name: 'api_me', methods: ['GET'])]
     public function getCurrentUser(): JsonResponse
     {
+        /** @var User|null $user */
         $user = $this->getUser();
         
         if (!$user) {

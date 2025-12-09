@@ -34,3 +34,7 @@ services:
     App\State\ReviewProcessor:
         bind:
             $processor: '@api_platform.doctrine.orm.state.persist_processor'
+
+    App\State\RatingProcessor:
+        bind:
+            $processor: '@api_platform.doctrine.orm.state.persist_processor'

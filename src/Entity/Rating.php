@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\RatingRepository;
+use App\State\RatingProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -20,9 +21,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['updatedAt' => 'DESC'],
 )]
 #[Get()]
-#[Post(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
-#[Patch(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
-#[Delete(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser() == user")]
+#[Post(processor: RatingProcessor::class, securityPostDenormalize: "is_granted('ROLE_USER')")]
+#[Patch(processor: RatingProcessor::class)]
+#[Delete(securityPostDenormalize: "is_granted('ROLE_USER') and object.getUser().getId() == user.getId()")]
 #[ApiResource(
     uriTemplate: '/users/{userId}/ratings',
     operations: [ new GetCollection() ],
@@ -32,9 +33,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 #[ApiResource(
     uriTemplate: '/movies/{movieId}/ratings',
-    operations: [ new GetCollection() ],
+    operations: [
+        new GetCollection(),
+        new Post(
+            processor: RatingProcessor::class,
+            securityPostDenormalize: "is_granted('ROLE_USER')"
+        )
+    ],
     uriVariables: ['movieId' => new Link(toProperty: 'movie', fromClass: Movie::class)],
     normalizationContext: ['groups' => ['rating:read']],
+    denormalizationContext: ['groups' => ['rating:write']],
     order: ['updatedAt' => 'DESC']
 )]
 #[ORM\Entity(repositoryClass: RatingRepository::class)]

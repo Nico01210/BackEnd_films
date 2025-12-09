@@ -437,4 +437,64 @@ class Movie
 
         return round($sum / count($this->ratings), 2);
     }
+
+    /**
+     * Expose les ratings publiquement (visible même sans authentification)
+     */
+    #[Groups(['movie:read'])]
+    public function getRatingsSummary(): ?array
+    {
+        if ($this->ratings->isEmpty()) {
+            return null;
+        }
+
+        $ratings = $this->ratings->toArray();
+        $sum = array_sum(array_map(fn($r) => $r->getNote(), $ratings));
+        $average = round($sum / count($ratings), 1);
+        $count = count($ratings);
+
+        // Calculer la distribution des notes (1-10)
+        $distribution = array_fill(1, 10, 0);
+        foreach ($ratings as $rating) {
+            $note = $rating->getNote();
+            if ($note >= 1 && $note <= 10) {
+                $distribution[$note]++;
+            }
+        }
+
+        return [
+            'average' => $average,
+            'count' => $count,
+            'distribution' => $distribution,
+        ];
+    }
+
+    /**
+     * Combine la note IMDb avec les ratings utilisateurs
+     */
+    #[Groups(['movie:read'])]
+    public function getCombinedRating(): ?array
+    {
+        $result = [
+            'imdb' => null,
+            'userAverage' => $this->getAverageRating(),
+            'combined' => null,
+        ];
+
+        // Récupère la note IMDb
+        if ($this->imdb && isset($this->imdb['rating'])) {
+            $result['imdb'] = (float) $this->imdb['rating'];
+        }
+
+        // Combine les notes si les deux existent
+        if ($result['imdb'] !== null && $result['userAverage'] !== null) {
+            $result['combined'] = round(($result['imdb'] + $result['userAverage']) / 2, 1);
+        } elseif ($result['imdb'] !== null) {
+            $result['combined'] = $result['imdb'];
+        } elseif ($result['userAverage'] !== null) {
+            $result['combined'] = $result['userAverage'];
+        }
+
+        return $result;
+    }
 }
