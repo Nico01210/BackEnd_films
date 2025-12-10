@@ -35,15 +35,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     uriTemplate: '/movies/{movieId}/ratings',
     operations: [
-        new GetCollection(),
-        new Post(
-            processor: RatingProcessor::class,
-            securityPostDenormalize: "is_granted('ROLE_USER')"
-        )
+        new GetCollection()
     ],
     uriVariables: ['movieId' => new Link(toProperty: 'movie', fromClass: Movie::class)],
     normalizationContext: ['groups' => ['rating:read']],
-    denormalizationContext: ['groups' => ['rating:write']],
     order: ['updatedAt' => 'DESC']
 )]
 #[ORM\Entity(repositoryClass: RatingRepository::class)]

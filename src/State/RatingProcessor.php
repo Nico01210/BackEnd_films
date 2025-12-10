@@ -40,8 +40,14 @@ final readonly class RatingProcessor implements ProcessorInterface
 
         // Pour POST (création), vérifier qu'il n'existe pas déjà une note
         if ($method === 'POST') {
-            // Vérifier que les entités User et Movie existent bien
-            $movieId = $data->getMovie() ? $data->getMovie()->getId() : null;
+            // Récupérer le movie - soit depuis les données, soit depuis l'URI
+            $movieId = null;
+            if ($data->getMovie() && $data->getMovie()->getId()) {
+                $movieId = $data->getMovie()->getId();
+            } elseif (isset($uriVariables['movieId'])) {
+                $movieId = $uriVariables['movieId'];
+            }
+            
             $managedMovie = $movieId ? $this->entityManager->find('App\Entity\Movie', $movieId) : null;
             
             if (!$managedMovie) {

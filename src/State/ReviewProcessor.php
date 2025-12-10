@@ -42,15 +42,26 @@ final readonly class ReviewProcessor implements ProcessorInterface
 
         // Si c'est un POST (création), vérifier qu'il n'existe pas déjà une review
         if ($method === 'POST') {
-            $existingReview = $this->entityManager->getRepository(Review::class)->findOneBy([
-                'user' => $user,
-                'movie' => $data->getMovie()
-            ]);
+            // Récupérer le movie - soit depuis les données, soit depuis l'URI
+            $movie = $data->getMovie();
+            if (!$movie && isset($uriVariables['movieId'])) {
+                $movie = $this->entityManager->find('App\Entity\Movie', $uriVariables['movieId']);
+                if ($movie) {
+                    $data->setMovie($movie);
+                }
+            }
 
-            if ($existingReview) {
-                throw new BadRequestHttpException(
-                    'Vous avez déjà commenté ce film. Utilisez PATCH pour modifier votre commentaire existant.'
-                );
+            if ($movie && $user) {
+                $existingReview = $this->entityManager->getRepository(Review::class)->findOneBy([
+                    'user' => $user,
+                    'movie' => $movie
+                ]);
+
+                if ($existingReview) {
+                    throw new BadRequestHttpException(
+                        'Vous avez déjà commenté ce film. Utilisez PATCH pour modifier votre commentaire existant.'
+                    );
+                }
             }
         }
 
